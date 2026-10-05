@@ -1,4 +1,5 @@
 #include <HTTPClient.h>
+#include <WebServer.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
@@ -8,8 +9,10 @@ const char *WIFI_PASSWORD = "VETRIDEVI";
 
 // ========== VERCEL API CONFIGURATION ==========
 const char *API_URL = "https://iot-pi-nine.vercel.app/api/telemetry";
-
 const char *DEVICE_TOKEN = "-yo1_XimjeNxK2NaDF2uFAvLSWCkji6T0_JR44Ktyc4";
+
+// ========== LOCAL HOTSPOT WEB SERVER ==========
+WebServer localServer(80);
 
 // ========== SENSOR PINS ==========
 #define TRIG_PIN 5
@@ -247,6 +250,23 @@ void printResults() {
   Serial.println("====================================");
 }
 
+// ========== PAYLOAD BUILDER ==========
+String buildPayloadJson() {
+  String payload = "{";
+  payload += "\"distance_cm\":" + String(distanceCm, 2) + ",";
+  payload += "\"water_height_cm\":" + String(waterHeightCm, 2) + ",";
+  payload += "\"water_percentage\":" + String(waterPercentage, 2) + ",";
+  payload += "\"water_status\":\"" + waterStatus + "\",";
+  payload += "\"flow_rate_l_min\":" + String(flowRateLMin, 3) + ",";
+  payload += "\"total_liters\":" + String(totalLiters, 3) + ",";
+  payload += "\"flow_detected\":" + String(flowDetected ? "true" : "false") + ",";
+  payload += "\"high_water_alarm\":" + String(highWaterAlarm ? "true" : "false") + ",";
+  payload += "\"leak_alarm\":" + String(leakAlarm ? "true" : "false") + ",";
+  payload += "\"system_alarm\":" + String(systemAlarm ? "true" : "false");
+  payload += "}";
+  return payload;
+}
+
 // ========== SEND DATA TO VERCEL ==========
 void uploadTelemetry() {
   if (WiFi.status() != WL_CONNECTED) {
@@ -255,12 +275,10 @@ void uploadTelemetry() {
   }
 
   WiFiClientSecure client;
-
-  // DEMO ONLY: skips TLS certificate verification.
-  // Use certificate validation for production deployments.
   client.setInsecure();
 
   HTTPClient https;
+  https.setTimeout(5000);
   https.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
   if (!https.begin(client, API_URL)) {
@@ -268,48 +286,20 @@ void uploadTelemetry() {
     return;
   }
 
-  Serial.print("Target URL: ");
-  Serial.println(API_URL);
-
   https.addHeader("Content-Type", "application/json");
   https.addHeader("x-device-token", DEVICE_TOKEN);
 
-  String payload = "{";
-
-  payload += "\"distance_cm\":" + String(distanceCm, 2) + ",";
-
-  payload += "\"water_height_cm\":" + String(waterHeightCm, 2) + ",";
-
-  payload += "\"water_percentage\":" + String(waterPercentage, 2) + ",";
-
-  payload += "\"water_status\":\"" + waterStatus + "\",";
-
-  payload += "\"flow_rate_l_min\":" + String(flowRateLMin, 3) + ",";
-
-  payload += "\"total_liters\":" + String(totalLiters, 3) + ",";
-
-  payload +=
-      "\"flow_detected\":" + String(flowDetected ? "true" : "false") + ",";
-
-  payload +=
-      "\"high_water_alarm\":" + String(highWaterAlarm ? "true" : "false") + ",";
-
-  payload += "\"leak_alarm\":" + String(leakAlarm ? "true" : "false") + ",";
-
-  payload += "\"system_alarm\":" + String(systemAlarm ? "true" : "false");
-
-  payload += "}";
-
-  Serial.println("Uploading sensor data...");
+  String payload = buildPayloadJson();
+  Serial.print("Uploading sensor data to ");
+  Serial.println(API_URL);
 
   int httpCode = https.POST(payload);
 
   if (httpCode == 201) {
-    Serial.println("CLOUD STATUS: UPLOAD SUCCESS");
+    Serial.println("CLOUD STATUS: UPLOAD SUCCESS (201 Created)");
   } else if (httpCode > 0) {
-    Serial.print("CLOUD STATUS: HTTP ERROR ");
+    Serial.print("CLOUD STATUS: HTTP ");
     Serial.println(httpCode);
-
     Serial.println(https.getString());
   } else {
     Serial.print("CLOUD STATUS: REQUEST FAILED: ");
@@ -326,8 +316,6 @@ void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
 
-  // GPIO34 has no internal pull-up.
-  // Add an external 3.3V pull-up if required by your flow sensor.
   pinMode(FLOW_PIN, INPUT);
 
   pinMode(LED_PIN, OUTPUT);
@@ -344,6 +332,19 @@ void setup() {
 
   connectWiFi();
 
+  // Configure local hotspot endpoints
+  localServer.enableCORS(true);
+  localServer.on("/", []() {
+    localServer.sendHeader("Access-Control-Allow-Origin", "*");
+    localServer.send(200, "application/json", buildPayloadJson());
+  });
+  localServer.on("/api/telemetry", []() {
+    localServer.sendHeader("Access-Control-Allow-Origin", "*");
+    localServer.send(200, "application/json", buildPayloadJson());
+  });
+  localServer.begin();
+  Serial.println("LOCAL SERVER: http://" + WiFi.localIP().toString() + "/");
+
   lastResultTime = millis();
   lastWiFiRetryTime = millis();
 }
@@ -351,6 +352,7 @@ void setup() {
 // ========== MAIN LOOP ==========
 void loop() {
   maintainWiFi();
+  localServer.handleClient();
 
   // Calculate flow over the same 7-second interval.
   updateFlowData();
