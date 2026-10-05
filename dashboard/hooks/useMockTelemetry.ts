@@ -175,7 +175,18 @@ export function useMockTelemetry(deviceId = 'ESP32-001') {
   // ── Simulation engine ─────────────────────────────────────────────────────
   function startMock() {
     if (mockRef.current) return;
+    // Don't start mock if mock mode is disabled
+    if (!useTelemetryStore.getState().isMockMode) return;
+
     mockRef.current = setInterval(() => {
+      if (!useTelemetryStore.getState().isMockMode) {
+        if (mockRef.current) {
+          clearInterval(mockRef.current);
+          mockRef.current = null;
+        }
+        return;
+      }
+
       const s = mockState.current;
       s.uptimeSeconds += MOCK_INTERVAL_MS / 1000;
 
