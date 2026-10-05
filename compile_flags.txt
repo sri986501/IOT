@@ -1,0 +1,4 @@
+-xc++
+-std=c++17
+-fsyntax-only
+-Wno-everything

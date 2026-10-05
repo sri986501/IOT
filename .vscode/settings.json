@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.ino": "cpp"
+  },
+  "clangd.fallbackFlags": [
+    "-xc++",
+    "-std=c++17",
+    "-Wno-everything"
+  ],
+  "C_Cpp.errorSquiggles": "disabled"
+}

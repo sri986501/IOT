@@ -1,0 +1,26 @@
+# Water Guardian ESP32 — Setup & Firmware Information
+
+## Required Arduino Libraries
+The updated Water Guardian firmware uses standard built-in ESP32 libraries. No third-party library installations are required!
+
+| Library      | Author    | Status   | Notes                              |
+|--------------|-----------|----------|------------------------------------|
+| WiFi         | Espressif | built-in | Included with ESP32 board package  |
+| WebServer    | Espressif | built-in | Included with ESP32 board package  |
+
+## Board Setup in Arduino IDE
+1. In Arduino IDE: **File → Preferences → Additional Board Manager URLs**:
+   `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json`
+2. **Tools → Board → Board Manager** → search `esp32` → Install **esp32 by Espressif Systems**.
+3. Under **Tools**:
+   - **Board**: "ESP32 Dev Module" (or your specific board like DOIT ESP32 DEVKIT V1)
+   - **Upload Speed**: 115200 or 921600
+   - **Flash Frequency**: 80MHz
+   - **Port**: Select your ESP32 COM port (e.g. COM3, COM4, COM5 on Windows)
+
+## Pin Assignments
+- **GPIO 5**: HC-SR04 TRIG (Trigger)
+- **GPIO 18**: HC-SR04 ECHO (Echo) *(Note: If using 5V HC-SR04, connect ECHO via 1kΩ / 2kΩ voltage divider to protect ESP32 3.3V pin)*
+- **GPIO 34**: JZ-S4-01 Flow Sensor (Yellow signal wire) *(Note: GPIO 34 is input-only. If sensor has open-collector output, add a 10kΩ pull-up resistor to 3.3V)*
+- **GPIO 27**: Status Alarm LED (via 220Ω resistor to GND)
+- **GPIO 26**: Alarm Buzzer (Active 3.3V/5V buzzer)
