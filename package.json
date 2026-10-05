@@ -11,6 +11,6 @@
     "start": "npm run start --workspace=dashboard"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.3"
+    "@supabase/supabase-js": "^2.117.2"
   }
 }

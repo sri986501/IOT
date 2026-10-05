@@ -88,7 +88,21 @@ export function useMockTelemetry(deviceId = 'ESP32-001') {
         });
         applyReading(reading.distance_cm, reading.flow_rate_lpm, reading.created_at);
       } else {
-        // 3. Fallback: Start Simulation engine + background ESP32 detector
+        // Check /api/telemetry before starting mock
+        try {
+          const tRes = await fetch('/api/telemetry');
+          if (tRes.ok) {
+            const tJson = await tRes.json();
+            if (tJson.connected && tJson.reading && !isCancelled) {
+              store.setMockMode(false);
+              return;
+            }
+          }
+        } catch {
+          // ignore
+        }
+
+        // 3. Fallback: Start Simulation engine only if no real stream detected
         store.setMockMode(true);
         startMock();
         startESP32Polling();

@@ -13,6 +13,12 @@ export interface TelemetryPacket {
   solenoidActive: boolean;
   systemHealth: 'optimal' | 'warning' | 'critical' | 'offline';
   warningState: 'none' | 'low' | 'critical' | 'overflow';
+  waterStatus?: string;
+  flowDetected?: boolean;
+  leakAlarm?: boolean;
+  highWaterAlarm?: boolean;
+  systemAlarm?: boolean;
+  totalLiters?: number;
 }
 
 export interface HardwareStatus {
@@ -182,7 +188,50 @@ export const useTelemetryStore = create<TelemetryStore>((set, get) => ({
   pollReading: async () => {
     set({ isPollingReading: true });
     try {
-      // 1. Try direct ESP32 hardware endpoint
+      // 1. Try primary /api/telemetry endpoint
+      try {
+        const telemRes = await fetch('/api/telemetry', { cache: 'no-store' });
+        if (telemRes.ok) {
+          const telemJson = await telemRes.json();
+          if (telemJson.reading) {
+            const r = telemJson.reading;
+            const now = r.created_at || new Date().toISOString();
+            const availableFluidL = Math.round((r.water_percentage / 100) * 1000);
+
+            get().setMockMode(false);
+            get().setHardware({
+              esp32Connected: true,
+              ultrasonicEchoLatencyMs: Math.max(1, Math.round(r.distance_cm * 0.583 * 2)),
+            });
+            get().setTelemetry({
+              timestamp: now,
+              tankHeightCm: 30,
+              distanceCm: Math.round(r.distance_cm * 10) / 10,
+              liquidLevelCm: Math.round(r.water_height_cm * 10) / 10,
+              fillPercentage: Math.round(r.water_percentage * 10) / 10,
+              volumeLitres: availableFluidL,
+              flowRateLpm: Math.round(r.flow_rate_l_min * 10) / 10,
+              waterStatus: r.water_status,
+              flowDetected: r.flow_detected,
+              leakAlarm: r.leak_alarm,
+              highWaterAlarm: r.high_water_alarm,
+              systemAlarm: r.system_alarm,
+              totalLiters: r.total_liters,
+            });
+            get().pushHistory({
+              time: new Date(now).toLocaleTimeString('en-IN', { hour12: false }),
+              volume: availableFluidL,
+              flowRate: Math.round(r.flow_rate_l_min * 10) / 10,
+              level: Math.round(r.water_percentage * 10) / 10,
+            });
+            return;
+          }
+        }
+      } catch {
+        // Continue to secondary endpoints
+      }
+
+      // 2. Try direct ESP32 hardware endpoint
       try {
         const espRes = await fetch('/api/esp32/telemetry');
         if (espRes.ok) {
