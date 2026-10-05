@@ -6,15 +6,25 @@ export const revalidate = 0;
 
 const allowedStatuses = ['HIGH', 'NORMAL', 'LOW', 'SENSOR_ERROR', 'STARTING'];
 
+const DEFAULT_SUPABASE_URL = 'https://fylyrgpqylbrjokptedo.supabase.co';
+const DEFAULT_SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5bHlyZ3BxeWxicmpva3B0ZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMTEyMzEsImV4cCI6MjEwMjc4NzIzMX0.xq4d215VYZEFVNuO4-cxFZbjO3Y9qkXrcmLMh7XnTpI';
+const DEFAULT_DEVICE_TOKEN = '-yo1_XimjeNxK2NaDF2uFAvLSWCkji6T0_JR44Ktyc4';
+
 // In-memory cache for ultra-fast response & fallback
 let latestCachedReading: any = null;
 
 function getDatabase() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url =
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    DEFAULT_SUPABASE_URL;
+
   const key =
     process.env.SUPABASE_SECRET_KEY ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    DEFAULT_SUPABASE_KEY;
 
   if (!url || !key) {
     return null;
@@ -108,10 +118,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const expectedToken = process.env.DEVICE_TOKEN;
+    const expectedToken = process.env.DEVICE_TOKEN || DEFAULT_DEVICE_TOKEN;
     const suppliedToken = request.headers.get('x-device-token');
 
-    if (expectedToken && suppliedToken !== expectedToken) {
+    if (suppliedToken !== expectedToken) {
       return NextResponse.json({ error: 'Invalid device token' }, { status: 401 });
     }
 
@@ -148,6 +158,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error: any) {
     console.error('Telemetry POST error:', error?.message);
-    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Server configuration error' }, { status: 500 });
   }
 }
