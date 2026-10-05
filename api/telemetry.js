@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-const allowedStatuses = ["HIGH", "NORMAL", "LOW", "SENSOR_ERROR"];
+const allowedStatuses = ["HIGH", "NORMAL", "LOW", "SENSOR_ERROR", "STARTING"];
 
 function getDatabase() {
   const url = process.env.SUPABASE_URL;

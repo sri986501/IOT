@@ -48,7 +48,7 @@ float distanceCm = -1.0;
 float waterHeightCm = 0.0;
 float waterPercentage = 0.0;
 
-String waterStatus = "STARTING";
+String waterStatus = "NORMAL";
 
 // ========== FLOW INTERRUPT ==========
 void IRAM_ATTR countFlowPulse() { flowPulseCount++; }
@@ -174,6 +174,7 @@ void updateWaterStatus() {
   waterHeightCm = constrain(waterHeightCm, 0.0, TANK_HEIGHT_CM);
 
   waterPercentage = (waterHeightCm / TANK_HEIGHT_CM) * 100.0;
+  waterPercentage = constrain(waterPercentage, 0.0, 100.0);
 
   if (distanceCm <= HIGH_LEVEL_DISTANCE_CM) {
     waterStatus = "HIGH";

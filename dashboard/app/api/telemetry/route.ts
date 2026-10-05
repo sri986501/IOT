@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const allowedStatuses = ['HIGH', 'NORMAL', 'LOW', 'SENSOR_ERROR'];
+const allowedStatuses = ['HIGH', 'NORMAL', 'LOW', 'SENSOR_ERROR', 'STARTING'];
 
 // In-memory cache for ultra-fast response & fallback
 let latestCachedReading: any = null;
