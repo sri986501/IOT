@@ -3,8 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 const allowedStatuses = ["HIGH", "NORMAL", "LOW", "SENSOR_ERROR", "STARTING"];
 
 function getDatabase() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY;
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
     throw new Error("Supabase environment variables are missing");
