@@ -7,7 +7,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { AnimatedLiquidTank } from '@/components/ui/AnimatedLiquidTank';
 import { FlowGaugeRadial } from '@/components/dashboard/FlowGaugeRadial';
 import { ConsumptionChart } from '@/components/dashboard/ConsumptionChart';
-import { ValveControlGrid } from '@/components/dashboard/ValveControlGrid';
+import { RealSensorPanel } from '@/components/dashboard/RealSensorPanel';
 import { HardwareDiagnostics } from '@/components/dashboard/HardwareDiagnostics';
 import {
   Droplets,
@@ -162,7 +162,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, fontFamily: 'JetBrains Mono' }}>
-              KY-040 Pulse Synchronized
+              JZ-S4-01 Hall Sensor Synchronized
             </div>
           </GlassCard>
 
@@ -248,18 +248,18 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono', fontWeight: 700 }}>
-                  ROTARY
+                  HALL SENSOR
                 </span>
               </div>
 
-              <FlowGaugeRadial flowLpm={telemetry.flowRateLpm} maxLpm={30} />
+              <FlowGaugeRadial flowLpm={telemetry.flowRateLpm} maxLpm={Math.max(100, Math.ceil(telemetry.flowRateLpm * 1.2))} />
             </GlassCard>
           </div>
 
-          {/* Actuator & Valve Controls */}
+          {/* Real Live Sensor Panel */}
           <div style={{ gridColumn: 'span 4' }}>
             <GlassCard accentColor="#059669" style={{ height: '100%' }}>
-              <ValveControlGrid />
+              <RealSensorPanel />
             </GlassCard>
           </div>
         </div>

@@ -185,134 +185,25 @@ export function FlowGaugeRadial({ flowLpm, maxLpm = 30 }: FlowGaugeRadialProps) 
         </span>
       </div>
 
-      {/* Step adjustments */}
+      {/* Pure sensor rate info */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '5px 10px',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: '8px 12px',
           borderRadius: '10px',
           background: '#F8FAFC',
           border: '1px solid #E2E8F0',
         }}
       >
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleAdjust(-1.0)}
-          style={{
-            padding: '4px 8px',
-            borderRadius: '6px',
-            background: '#FFFFFF',
-            border: '1px solid #CBD5E1',
-            color: '#0284C7',
-            cursor: 'pointer',
-            fontSize: '11px',
-            fontWeight: 700,
-            fontFamily: 'JetBrains Mono',
-          }}
-          title="-1.0 L/min"
-        >
-          -1.0
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleAdjust(-0.5)}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            background: '#FFFFFF',
-            border: '1px solid #CBD5E1',
-            color: '#0284C7',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title="-0.5 L/min"
-        >
-          <Minus size={13} />
-        </motion.button>
-
-        <span
-          style={{
-            fontSize: '11px',
-            color: store.flowAdjustment !== 0 ? '#0284C7' : 'var(--text-muted)',
-            width: '68px',
-            textAlign: 'center',
-            fontFamily: 'JetBrains Mono',
-            fontWeight: 800,
-          }}
-        >
-          {store.flowAdjustment > 0 ? '+' : ''}
-          {store.flowAdjustment.toFixed(1)} L/m
+        <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+          Flow Calibration
         </span>
-
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleAdjust(0.5)}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            background: '#FFFFFF',
-            border: '1px solid #CBD5E1',
-            color: '#0284C7',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title="+0.5 L/min"
-        >
-          <Plus size={13} />
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleAdjust(1.0)}
-          style={{
-            padding: '4px 8px',
-            borderRadius: '6px',
-            background: '#FFFFFF',
-            border: '1px solid #CBD5E1',
-            color: '#0284C7',
-            cursor: 'pointer',
-            fontSize: '11px',
-            fontWeight: 700,
-            fontFamily: 'JetBrains Mono',
-          }}
-          title="+1.0 L/min"
-        >
-          +1.0
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={handleReset}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            background: '#FFF1F2',
-            border: '1px solid #FECDD3',
-            color: '#E11D48',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title="Reset Flow Trim"
-        >
-          <RotateCcw size={12} />
-        </motion.button>
+        <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono', fontWeight: 800, color: '#059669' }}>
+          450 Pulses / L
+        </span>
       </div>
     </div>
   );
