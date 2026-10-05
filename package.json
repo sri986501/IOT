@@ -1,12 +1,12 @@
 {
   "name": "iot-root",
   "private": true,
+  "workspaces": [
+    "dashboard"
+  ],
   "scripts": {
-    "dev": "npm --prefix dashboard run dev",
-    "build": "npm --prefix dashboard run build",
-    "start": "npm --prefix dashboard run start"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.112.3"
+    "dev": "npm run dev --workspace=dashboard",
+    "build": "npm run build --workspace=dashboard",
+    "start": "npm run start --workspace=dashboard"
   }
 }
