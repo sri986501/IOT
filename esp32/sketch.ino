@@ -260,11 +260,15 @@ void uploadTelemetry() {
   client.setInsecure();
 
   HTTPClient https;
+  https.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
   if (!https.begin(client, API_URL)) {
     Serial.println("CLOUD STATUS: CONNECTION FAILED");
     return;
   }
+
+  Serial.print("Target URL: ");
+  Serial.println(API_URL);
 
   https.addHeader("Content-Type", "application/json");
   https.addHeader("x-device-token", DEVICE_TOKEN);
