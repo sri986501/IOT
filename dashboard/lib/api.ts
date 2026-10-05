@@ -133,11 +133,11 @@ export async function fetchReadings(
       .limit(limit);
 
     if (error || !data || data.length === 0) {
-      return generateSampleReadings(deviceId, limit > 30 ? 30 : limit);
+      return [];
     }
     return data as SensorReading[];
   } catch {
-    return generateSampleReadings(deviceId, 30);
+    return [];
   }
 }
 
@@ -158,41 +158,12 @@ export async function fetchReadingsPaginated(
       .range(from, to);
 
     if (error || !data || data.length === 0) {
-      const samples = generateSampleReadings(deviceId, 50);
-      return { readings: samples, total: samples.length };
+      return { readings: [], total: 0 };
     }
     return { readings: (data as SensorReading[]) ?? [], total: count ?? 0 };
   } catch {
-    const samples = generateSampleReadings(deviceId, 50);
-    return { readings: samples, total: samples.length };
+    return { readings: [], total: 0 };
   }
-}
-
-// Generate realistic simulated readings when offline or first launching
-function generateSampleReadings(deviceId: string, count: number): SensorReading[] {
-  const now = Date.now();
-  const step = 60 * 1000; // 1 min steps
-  const out: SensorReading[] = [];
-
-  for (let i = count - 1; i >= 0; i--) {
-    const t = new Date(now - i * step).toISOString();
-    const pct = 72 + Math.sin(i / 4) * 6 + (Math.random() - 0.5) * 1.5;
-    const clampedPct = Math.max(10, Math.min(95, pct));
-    const vol = (clampedPct / 100) * 1000;
-    const dist = 100 - (clampedPct / 100) * 100;
-    const flow = 8.2 + Math.cos(i / 5) * 3 + (Math.random() - 0.5) * 0.8;
-
-    out.push({
-      id: `sample-${i}`,
-      device_id: deviceId,
-      distance_cm: Math.round(dist * 10) / 10,
-      water_level_percent: Math.round(clampedPct * 10) / 10,
-      water_volume_liters: Math.round(vol * 10) / 10,
-      flow_rate_lpm: Math.round(Math.max(0, flow) * 10) / 10,
-      created_at: t,
-    });
-  }
-  return out;
 }
 
 // ============================================================================

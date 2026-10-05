@@ -85,24 +85,30 @@ interface TelemetryStore {
 
 const defaultTelemetry: TelemetryPacket = {
   timestamp: new Date().toISOString(),
-  tankHeightCm: 100,
-  distanceCm: 25.4,
-  liquidLevelCm: 74.6,
-  volumeLitres: 746,
-  fillPercentage: 74.6,
-  flowRateLpm: 8.4,
+  tankHeightCm: 15,
+  distanceCm: 0,
+  liquidLevelCm: 0,
+  volumeLitres: 0,
+  fillPercentage: 0,
+  flowRateLpm: 0,
   pumpActive: false,
-  solenoidActive: true,
-  systemHealth: 'optimal',
+  solenoidActive: false,
+  systemHealth: 'offline',
   warningState: 'none',
+  waterStatus: 'NORMAL',
+  flowDetected: false,
+  leakAlarm: false,
+  highWaterAlarm: false,
+  systemAlarm: false,
+  totalLiters: 0,
 };
 
 const defaultHardware: HardwareStatus = {
-  esp32Connected: true,
+  esp32Connected: false,
   oledStatus: true,
-  ultrasonicEchoLatencyMs: 18,
+  ultrasonicEchoLatencyMs: 0,
   rotaryState: 0,
-  uptimeSeconds: 120,
+  uptimeSeconds: 0,
 };
 
 export const useTelemetryStore = create<TelemetryStore>((set, get) => ({
@@ -288,21 +294,8 @@ export const useTelemetryStore = create<TelemetryStore>((set, get) => ({
           });
         }
       }
-    } catch {
-      // Fallback local fluctuation
-      const s = get();
-      const delta = (Math.random() - 0.48) * 2;
-      const newPct = Math.max(10, Math.min(98, s.telemetry.fillPercentage + delta));
-      const vol = (newPct / 100) * 1000;
-      const dist = 100 - newPct;
-      get().setTelemetry({
-        timestamp: new Date().toISOString(),
-        distanceCm: Math.round(dist * 10) / 10,
-        liquidLevelCm: Math.round(newPct * 10) / 10,
-        volumeLitres: Math.round(vol * 10) / 10,
-        fillPercentage: Math.round(newPct * 10) / 10,
-        flowRateLpm: Math.round((8.2 + Math.random() * 2) * 10) / 10,
-      });
+    } catch (err) {
+      console.warn('Live telemetry polling error:', err);
     } finally {
       setTimeout(() => set({ isPollingReading: false }), 400);
     }

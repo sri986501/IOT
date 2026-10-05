@@ -137,11 +137,11 @@ export function useWaterTelemetry() {
       }
     }
 
-    // Initial fetch
+    // Initial fetch immediately
     fetchTelemetry();
 
-    // 7-second polling interval matching ESP32 7-second upload cadence
-    const timer = setInterval(fetchTelemetry, 7000);
+    // Fast 3-second polling interval for live data response
+    const timer = setInterval(fetchTelemetry, 3000);
 
     return () => {
       active = false;

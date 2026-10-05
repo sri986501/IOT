@@ -1,6 +1,5 @@
 'use client';
 
-import { useMockTelemetry } from '@/hooks/useMockTelemetry';
 import { useWaterTelemetry } from '@/hooks/useWaterTelemetry';
 import { useTelemetryStore } from '@/store/useTelemetryStore';
 import { AppShell } from '@/components/AppShell';
@@ -23,7 +22,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DashboardPage() {
-  useMockTelemetry('ESP32-001');
   useWaterTelemetry();
 
   const { telemetry, hardware, alerts, isPollingReading, pollReading } = useTelemetryStore();
